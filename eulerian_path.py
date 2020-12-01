@@ -90,11 +90,11 @@ def depth_first_traveral(graph, start_node, edges_out):
 
 if __name__ == "__main__": 
   kmers_dict = []
-  kmers_dict.append("TAGCTTAAAAAGCTCCTTGAACAATGGAAC")
-  kmers_dict.append("CTAGTTATAGGTTTCCTATTCCTTACATGT")
-  kmers_dict.append("ATTTGTCTTCTCCTTTTTGCCTATGCCCTC")
-  a = construct_DeBruijn_graph(kmers_dict)
-  print(a)
+  # kmers_dict.append("TAGCTTAAAAAGCTCCTTGAACAATGGAAC")
+  # kmers_dict.append("CTAGTTATAGGTTTCCTATTCCTTACATGT")
+  # kmers_dict.append("ATTTGTCTTCTCCTTTTTGCCTATGCCCTC")
+  # a = construct_DeBruijn_graph(kmers_dict)
+  # print(a)
     
   """
   Extra edges that cannot be traversed -

@@ -43,4 +43,5 @@ def read_data(filename, k):
   
 if __name__ == "__main__":
   kmers = read_data("trimmomatic_outputs/output_forward_unpaired.fq", 30)
-  graph, weights = construct_DeBruijn_graph(kmers)
+  print(kmers)
+  # graph, weights = construct_DeBruijn_graph(kmers)
