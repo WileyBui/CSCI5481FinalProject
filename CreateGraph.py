@@ -40,7 +40,8 @@ def clean_kmers(kmers_dict):
 def De_Bruijn_Graph(shotgun_seqs,k):
     kmers_dict = find_kmers(shotgun_seqs,k)
     clean_kmers(kmers_dict)
-    graph,weight = construct_DeBruijn_graph(kmers_dict)
+    (graph,weight) = construct_DeBruijn_graph(kmers_dict)
+    return (graph,weigth)
 
 
 def main():
