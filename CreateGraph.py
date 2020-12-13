@@ -1,5 +1,4 @@
 
-
 def construct_DeBruijn_graph(kmers_dict):
     graph = {}
     weights = {}
@@ -18,7 +17,6 @@ def construct_DeBruijn_graph(kmers_dict):
             weights[first_kminus1mer+"_to_"+second_kmius1mer] += 1
 
     return (graph,weights)
-
 
 def find_kmers(shotgun_seqs,k):
     kmers_dict = {}
