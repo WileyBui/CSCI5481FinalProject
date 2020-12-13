@@ -86,6 +86,7 @@ graph["2"].append("1")
 graph["0"].append("3")
 graph["3"].append("4")
 graph["4"].append("0")
+
 is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
 start_vertex = get_starting_node(graph, edges_in, edges_out)
 path = depth_first_traveral(graph, start_vertex, edges_out)

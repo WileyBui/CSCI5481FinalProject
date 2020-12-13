@@ -1,4 +1,4 @@
-
+from eulerian_path import *
 
 def construct_DeBruijn_graph(kmers_dict):
     graph = {}
@@ -19,18 +19,74 @@ def construct_DeBruijn_graph(kmers_dict):
 
     return (graph,weights)
 
+def find_kmers(shotgun_seqs,k):
+    kmers_dict = {}
+    for seq in shotgun_seqs:
+        for i in range(len(seq)-k+1):
+            kmer = seq[i:i+k]
+            if kmer in kmers_dict:
+                kmers_dict[kmer] += 1
+            else:
+                kmers_dict[kmer] = 1
+    return kmers_dict
 
+def clean_kmers(kmers_dict):
+    for kmer in list(kmers_dict):
+        if kmers_dict[kmer] <= 2:
+            del kmers_dict[kmer]
+
+
+def De_Bruijn_Graph(shotgun_seqs,k):
+    kmers_dict = find_kmers(shotgun_seqs,k)
+    clean_kmers(kmers_dict)
+    (graph,weight) = construct_DeBruijn_graph(kmers_dict)
+    return (graph,weight)
+
+def read_data(filename):
+    f     = open(filename, "r")
+    lines = f.readlines()
+    f.close()
+    
+    sequences = []
+    
+    for line in lines:
+        sequences.append(line.strip())
+    return sequences
+
+def parse_data(data):
+    string = ""
+    for each in data:
+        string += each[0]
+    string += data[len(data) - 1][1:len(data)]
+    return string
+    
+def save_results_to_file(output_file, results):
+    f_write = open(output_file, "w+")
+    f_write.write(results)
+    f_write.close()
+    print("Successfully saved data to", output_file)
+    
 def main():
-    kmers_dict = ['ATCTAGAGTATTAGGTTTGAAAACCCTTGC', 'TACTGCCTCTTATATACATCTCCGAGCCCA', 'CGAGACGTAGAGGATTCTCGTATGCCAGCT', 'TCTGATTGCAAAACAAAGTTTCTAATCCAC', 'CTCCTCGTGCACACGAGACCGGAGCCTATC', 'TCGTCTGCCGTCTTCTGCTTGAAAAAAAAA', 'CCCAACTCTAAATCCTCTCCCCCTCCTATT', 'ATCTTCTCTTCATTTTTTATAAACATAACC', 'GTAGATACACAAACACCAGCTTCTGATCTT', 'GTTTCTTATACACATCTCCGAGTCCACGAG', 'ACGTAGAGGTATCTCGTATGCCGTCTTCTG', 'CTTGATAAAACAAACACTTTTTTTTTTTAC', 'TTACCGTTTACTTCTTTACCTCCTCTCTTC', 'CCCCACCTCCCTTTCCTTTGTTTCATATAC', 'CATTATCTACTGACTAATAGATTACAGACT', 'TTCTCTTATTCACCTCTCCGACCCCCCCCG', 'ATGCCAGATTACGTGCTAAGCACTATGTGT', 'ACATCTGCCACTTATACACATCTCCGAGCC', 'CACGAGACGTAGAGGAACACCGAATGCCGT', 'CTTCTGCCTGTAAAAACCACATGACATTCT', 'CAGCATCTTACCCACATATACACGCCCACG', 'CGCAGGACTCTACTCTTGTATTCCTTCTTC', 'TTCTTGTGATTTAAAAAAAAGATAAAGAGC', 'TAAACACTATGTGTACATTTTCTGTATGTT', 'CCTTTTGAAATTAAATTGGCAAAGAAATTT', 'GACCTGTCTCTTATACCACATCTCCGAGCC', 'CACGAGACGTAGAGGAATCTCGTATGCCGT', 'CTTCTGCTTGAAAAAAAAAAAACACATCAC', 'CTGCGCCTCCTTCTTCTCTCACCCCCCACG', 'GTGACCGTAGCGTCATCCCGCCGTTTTCCT', 'CGTCGCCGCATCCCCCCCATCCCACTCTGT', 'CTCTTCTCGCCCTCACCGCGCCCCCGCCAC', 'GCTACAGGAGCAGCAGGTAGGGGCGGGCCT', 'TGCTCTTATTCACAACTCTCTGACCACGAG', 'GCGTTGGGGAATCTTATACACCGCCCTTAG', 'CCCGCAAAAACAAAGCTTATCTCATCTGCC', 'GTCTTCTGCTTCTACAATATGTCTCTTATC', 'CACCTCTCCGAGCCCCCGAGACGCTCATGA', 'ATCTCCTCTTCCGTCTTCTGCTTGAACAAC', 'ACCGAAACCCCTCACCTTCCCCTACTTCCT', 'TTTTCAAACACGTGCAGGCTGTTTAATCTG', 'TCTCTTATACACATTCTCCGAGCCCACGAG', 'ACGTAGAGGAATCTCGTATGCCGTCTTCTG', 'CTTGAAAAAAACTAATATACACATCTCCGA', 'GCTCACGAGACAAGCAGCCATTTCGCATGC', 'AGACTTCTCCTTGAAAGAAAAAAAATCAAA', 'CTGCAACTCTATTTGTTTGAGTGTTACCAC']
-    graph,weights = construct_DeBruijn_graph(kmers_dict)
-
-    fake = ["abc","bca","cab","aba","aab"]
-    graph,weights = construct_DeBruijn_graph(fake)
-    print(graph)
-    print(weights)
-    for key in graph:
-        print(len(graph[key]))
-
+    filenames = ["data_1.txt", "data_2.txt"]
+    
+    for filename in filenames:
+        print("\n\n==============================================")
+        sequences = read_data(filename)
+        graph, weights = De_Bruijn_Graph(sequences, 30)
+        
+        is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
+        
+        if (is_valid_eulerian_path):
+            print(filename, "Eulerian path: SUCCESSFULLY FOUND!")
+        else:
+            print(filename, "Eulerian path: UNSUCCESS, but found a partial assembled genome path...")
+            
+        start_vertex = get_starting_node(graph, edges_in, edges_out)
+        path_list = depth_first_traveral(graph, start_vertex, edges_out)
+        path = parse_data(path_list)
+        print(path)
+        
+        save_results_to_file("results_" + filename, path)
 
 if __name__ == '__main__':
     main()
