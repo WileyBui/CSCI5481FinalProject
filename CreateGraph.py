@@ -60,8 +60,13 @@ def parse_data(data):
     string += data[len(data) - 1][1:len(data)]
     return string
     
-def save_results_to_file(output_file, results):
+def save_results_to_file(output_file, results, success):
     f_write = open(output_file, "w+")
+    if success:
+        f_write.write("Success\n")
+    else:
+        f_write.write("Unsuccess\n")
+        
     f_write.write(results)
     f_write.close()
     print("Successfully saved data to", output_file)
@@ -69,10 +74,13 @@ def save_results_to_file(output_file, results):
 def main():
     filenames = ["data_1.txt", "data_2.txt"]
     
+    
     for filename in filenames:
-        print("\n\n==============================================")
+        k = 3
         sequences = read_data(filename)
-        graph, weights = De_Bruijn_Graph(sequences, 30)
+        print("\n\n==============================================")
+        
+        graph, weights = De_Bruijn_Graph(sequences, k)
         
         is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
         
@@ -84,9 +92,8 @@ def main():
         start_vertex = get_starting_node(graph, edges_in, edges_out)
         path_list = depth_first_traveral(graph, start_vertex, edges_out)
         path = parse_data(path_list)
-        print(path)
-        
-        save_results_to_file("results_" + filename, path)
+    
+        save_results_to_file("results_" + str(k) + "k_" + filename, path, is_valid_eulerian_path)
 
 if __name__ == '__main__':
     main()
