@@ -3,6 +3,9 @@ from eulerian_path import *
 def construct_DeBruijn_graph(kmers_dict):
     graph = {}
     weights = {}
+    
+    # for kmer in kmers_dict.keys():
+        
     for kmer in kmers_dict:
         k = len(kmer)
         first_kminus1mer = kmer[:k-1]
@@ -16,11 +19,11 @@ def construct_DeBruijn_graph(kmers_dict):
             weights[first_kminus1mer+"_to_"+second_kmius1mer] = 1
         else:
             weights[first_kminus1mer+"_to_"+second_kmius1mer] += 1
-
     return (graph,weights)
 
 def find_kmers(shotgun_seqs,k):
     kmers_dict = {}
+    kmers_list = []
     for seq in shotgun_seqs:
         for i in range(len(seq)-k+1):
             kmer = seq[i:i+k]
@@ -28,17 +31,19 @@ def find_kmers(shotgun_seqs,k):
                 kmers_dict[kmer] += 1
             else:
                 kmers_dict[kmer] = 1
-    return kmers_dict
+            kmers_list.append(kmer)
+    return kmers_dict, kmers_list
 
-def clean_kmers(kmers_dict):
+def clean_kmers(kmers_dict, kmers_list):
+    removing_kmers = []
     for kmer in list(kmers_dict):
         if kmers_dict[kmer] <= 2:
-            del kmers_dict[kmer]
-
+            removing_kmers.append(kmer)
+    
+    return [x for x in kmers_list if x not in removing_kmers]
 
 def De_Bruijn_Graph(shotgun_seqs,k):
-    kmers_dict = find_kmers(shotgun_seqs,k)
-    clean_kmers(kmers_dict)
+    kmers_dict = clean_kmers(find_kmers(shotgun_seqs,k))
     (graph,weight) = construct_DeBruijn_graph(kmers_dict)
     return (graph,weight)
 
@@ -55,8 +60,11 @@ def read_data(filename):
 
 def parse_data(data):
     string = ""
+    last_elem = ""
     for each in data:
-        string += each[0]
+        if last_elem != each:
+            string += each[0]
+            last_elem = each
     string += data[len(data) - 1][1:len(data)]
     return string
     
@@ -74,13 +82,18 @@ def save_results_to_file(output_file, results, success):
 def main():
     filenames = ["data_1.txt", "data_2.txt"]
     
-    
     for filename in filenames:
-        k = 3
+        k = 20
         sequences = read_data(filename)
         print("\n\n==============================================")
         
-        graph, weights = De_Bruijn_Graph(sequences, k)
+        print("Finding all kmers... ", end="")
+        kmers_dictionary, kmers_list = find_kmers(sequences, k)
+        print("success.")
+        
+        print("Constructing De Bruijn Graph... ", end="")
+        graph, weights = construct_DeBruijn_graph(kmers_list)
+        print("success.")
         
         is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
         
@@ -93,7 +106,7 @@ def main():
         path_list = depth_first_traveral(graph, start_vertex, edges_out)
         path = parse_data(path_list)
     
-        save_results_to_file("results_" + str(k) + "k_" + filename, path, is_valid_eulerian_path)
+        save_results_to_file("results_k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
 
 if __name__ == '__main__':
     main()
