@@ -78,7 +78,7 @@ def depth_first_traveral(graph, start_node, edges_out):
   def dfs(current_node):
     # print("current: {}; edges_out: {}".format(current_node, edges_out))
     
-    # keeps traversing until all outgoing edges are equal to 0
+    # keeps traversing until all outgoing edges are equal to 0 (or when a node is unexplorable)
     while (current_node in edges_out and edges_out[current_node] != 0):
       edges_out[current_node] -= 1  # visited the node, so we remove 1 outgoing edge
       next_node = graph[current_node][edges_out[current_node]]  # to visit the next node
