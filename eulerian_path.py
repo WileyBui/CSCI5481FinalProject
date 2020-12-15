@@ -1,7 +1,3 @@
-# import networkx as nx  
-# import matplotlib
-# import matplotlib.pyplot as plt
-    
 def has_eulerian_path_and_get_edges(graph):
   """
   This has_eulerian_path_and_get_edges function checks to see if a given graph
@@ -23,6 +19,11 @@ def has_eulerian_path_and_get_edges(graph):
   # updates on where the edge is coming from and to (edges_out/edges_in)
   for current_node in graph:
     for out_going_edge in graph[current_node]:
+      if (current_node not in edges_out):
+        edges_out[current_node] = 0
+      if (out_going_edge not in edges_in):
+        edges_in[out_going_edge] = 0
+        
       edges_out[current_node] += 1
       edges_in[out_going_edge] += 1
       
@@ -33,7 +34,7 @@ def has_eulerian_path_and_get_edges(graph):
   for i in graph:
     # has more than 1 extra edge in node results no eulerian path
     if (abs(edges_out[i] - edges_in[i]) > 1):
-      return False, {}, {}
+      return False, edges_in, edges_out
     
     # If there's an extra edge coming in or coming out from 1 node to another,
     # we add it up. It means that the extra edge that's coming out is the starting 
@@ -70,31 +71,25 @@ def depth_first_traveral(graph, start_node, edges_out):
   
   Idea from:
     https://www.geeksforgeeks.org/hierholzers-algorithm-directed-graph/
-    https://www.youtube.com/watch?v=8MpoO2zA2l
+    https://www.youtube.com/watch?v=8MpoO2zA2l4
   """
   
   path = []
   def dfs(current_node):
     # print("current: {}; edges_out: {}".format(current_node, edges_out))
     
-    # keeps traversing until all outgoing edges are equal to 0
-    while (edges_out[current_node] != 0):
+    # keeps traversing until all outgoing edges are equal to 0 (or when a node is unexplorable)
+    while (current_node in edges_out and edges_out[current_node] != 0):
       edges_out[current_node] -= 1  # visited the node, so we remove 1 outgoing edge
       next_node = graph[current_node][edges_out[current_node]]  # to visit the next node
       dfs(next_node)
     path.insert(0, current_node)    # pre-append to the path when no outgoing edges are left
     
   dfs(start_node)
-  print(path)
   return path
 
+
 if __name__ == "__main__": 
-  kmers_dict = []
-  # kmers_dict.append("TAGCTTAAAAAGCTCCTTGAACAATGGAAC")
-  # kmers_dict.append("CTAGTTATAGGTTTCCTATTCCTTACATGT")
-  # kmers_dict.append("ATTTGTCTTCTCCTTTTTGCCTATGCCCTC")
-  # a = construct_DeBruijn_graph(kmers_dict)
-  # print(a)
     
   """
   Extra edges that cannot be traversed -

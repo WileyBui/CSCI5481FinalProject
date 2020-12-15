@@ -1,53 +1,99 @@
+from eulerian_path import *
 
-def construct_DeBruijn_graph(kmers_dict):
-    graph = {}
-    weights = {}
-    for kmer in kmers_dict:
-        k = len(kmer)
-        first_kminus1mer = kmer[:k-1]
-        second_kmius1mer = kmer[1:]
-        if first_kminus1mer not in graph:
-            graph[first_kminus1mer] = [second_kmius1mer]
-        else:
-            graph[first_kminus1mer] = graph[first_kminus1mer] + [second_kmius1mer]
-
-        if first_kminus1mer+"_to_"+second_kmius1mer not in weights:
-            weights[first_kminus1mer+"_to_"+second_kmius1mer] = kmers_dict[kmer]
-        else:
-            weights[first_kminus1mer+"_to_"+second_kmius1mer] += kmers_dict[kmer]
-
-    return (graph,weights)
-
-def find_kmers(shotgun_seqs,k):
+def reads_to_kmers(reads,k):
     kmers_dict = {}
-    for seq in shotgun_seqs:
-        for i in range(len(seq)-k+1):
-            kmer = seq[i:i+k]
-            if kmer in kmers_dict:
-                kmers_dict[kmer] += 1
-            else:
+    for r in reads:
+        for i in range(len(r)-k+1):
+            kmer = r[i:i+k]
+            if kmer not in kmers_dict:
                 kmers_dict[kmer] = 1
+            else:
+                kmers_dict[kmer] += 1
     return kmers_dict
 
-def clean_kmers(kmers_dict):
-    for kmer in list(kmers_dict):
-        if kmers_dict[kmer] <= 1:
-            del kmers_dict[kmer]
+def cleanup_kmers(kmers_dict):
+    cleaned_kmers_dict = {}
+    for kmer in kmers_dict:
+        if kmers_dict[kmer] > 1:
+            cleaned_kmers_dict[kmer] = kmers_dict[kmer]
+    return cleaned_kmers_dict
 
+def add_nodes_and_edges(kmers_dict):
+    graph = {}
+    for kmer in kmers_dict:
+        left = kmer[:-1]
+        right = kmer[1:]
+        if left in graph:
+            graph[left] += [right]
+        else:
+            graph[left] = [right]
+    return graph
 
-def De_Bruijn_Graph(shotgun_seqs,k):
-    kmers_dict = find_kmers(shotgun_seqs,k)
-    clean_kmers(kmers_dict)
-    (graph,weight) = construct_DeBruijn_graph(kmers_dict)
-    return (graph,weigth)
+def de_bruijn(reads,k):
+    kmers = cleanup_kmers((reads_to_kmers(reads,k)))
+    return add_nodes_and_edges(kmers)
 
+def read_data(filename):
+    f     = open(filename, "r")
+    lines = f.readlines()
+    f.close()
+    
+    sequences = []
+    
+    for line in lines:
+        sequences.append(line.strip())
+    return sequences
 
+def parse_data(data):
+    string = ""
+    for each in data:
+        string += each[0]
+    string += data[len(data) - 1][1:]
+    return string
+    
+def save_results_to_file(output_file, results, success):
+    f_write = open(output_file, "w+")
+    if success:
+        f_write.write("Success\n")
+    else:
+        f_write.write("Unsuccess\n")
+        
+    f_write.write(results)
+    f_write.close()
+    print("Successfully saved data to", output_file)
+    
 def main():
-    kmers_dict = ['ATCTAGAGTATTAGGTTTGAAAACCCTTGC', 'TACTGCCTCTTATATACATCTCCGAGCCCA', 'CGAGACGTAGAGGATTCTCGTATGCCAGCT', 'TCTGATTGCAAAACAAAGTTTCTAATCCAC', 'CTCCTCGTGCACACGAGACCGGAGCCTATC', 'TCGTCTGCCGTCTTCTGCTTGAAAAAAAAA', 'CCCAACTCTAAATCCTCTCCCCCTCCTATT', 'ATCTTCTCTTCATTTTTTATAAACATAACC', 'GTAGATACACAAACACCAGCTTCTGATCTT', 'GTTTCTTATACACATCTCCGAGTCCACGAG', 'ACGTAGAGGTATCTCGTATGCCGTCTTCTG', 'CTTGATAAAACAAACACTTTTTTTTTTTAC', 'TTACCGTTTACTTCTTTACCTCCTCTCTTC', 'CCCCACCTCCCTTTCCTTTGTTTCATATAC', 'CATTATCTACTGACTAATAGATTACAGACT', 'TTCTCTTATTCACCTCTCCGACCCCCCCCG', 'ATGCCAGATTACGTGCTAAGCACTATGTGT', 'ACATCTGCCACTTATACACATCTCCGAGCC', 'CACGAGACGTAGAGGAACACCGAATGCCGT', 'CTTCTGCCTGTAAAAACCACATGACATTCT', 'CAGCATCTTACCCACATATACACGCCCACG', 'CGCAGGACTCTACTCTTGTATTCCTTCTTC', 'TTCTTGTGATTTAAAAAAAAGATAAAGAGC', 'TAAACACTATGTGTACATTTTCTGTATGTT', 'CCTTTTGAAATTAAATTGGCAAAGAAATTT', 'GACCTGTCTCTTATACCACATCTCCGAGCC', 'CACGAGACGTAGAGGAATCTCGTATGCCGT', 'CTTCTGCTTGAAAAAAAAAAAACACATCAC', 'CTGCGCCTCCTTCTTCTCTCACCCCCCACG', 'GTGACCGTAGCGTCATCCCGCCGTTTTCCT', 'CGTCGCCGCATCCCCCCCATCCCACTCTGT', 'CTCTTCTCGCCCTCACCGCGCCCCCGCCAC', 'GCTACAGGAGCAGCAGGTAGGGGCGGGCCT', 'TGCTCTTATTCACAACTCTCTGACCACGAG', 'GCGTTGGGGAATCTTATACACCGCCCTTAG', 'CCCGCAAAAACAAAGCTTATCTCATCTGCC', 'GTCTTCTGCTTCTACAATATGTCTCTTATC', 'CACCTCTCCGAGCCCCCGAGACGCTCATGA', 'ATCTCCTCTTCCGTCTTCTGCTTGAACAAC', 'ACCGAAACCCCTCACCTTCCCCTACTTCCT', 'TTTTCAAACACGTGCAGGCTGTTTAATCTG', 'TCTCTTATACACATTCTCCGAGCCCACGAG', 'ACGTAGAGGAATCTCGTATGCCGTCTTCTG', 'CTTGAAAAAAACTAATATACACATCTCCGA', 'GCTCACGAGACAAGCAGCCATTTCGCATGC', 'AGACTTCTCCTTGAAAGAAAAAAAATCAAA', 'CTGCAACTCTATTTGTTTGAGTGTTACCAC']
-    graph,weights = construct_DeBruijn_graph(kmers_dict)
-
-
-
+    filenames = ["data_1.txt", "data_2.txt", "data_covid.txt"]
+    data_dict = {}
+    
+    for filename in filenames:
+        data_dict[filename] = read_data(filename)
+        
+    for k in range(25, 35):
+        for filename in filenames:
+            sequences = data_dict[filename]
+            print("\n\n==============================================")
+            
+            print("Constructing De Bruijn Graph for k={}... ".format(k), end="")
+            graph = de_bruijn(sequences, k)
+            print("success.")
+            
+            if (len(graph) == 0):
+                print("Unsuccess: de_bruijn() returns 0 nodes...")
+                return
+            
+            is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
+            
+            if (is_valid_eulerian_path):
+                print(filename, "Eulerian path: SUCCESSFULLY FOUND!")
+            else:
+                print(filename, "Eulerian path: UNSUCCESS, but found a partial assembled genome path...")
+                
+            start_vertex = get_starting_node(graph, edges_in, edges_out)
+            path_list = depth_first_traveral(graph, start_vertex, edges_out)
+            path = parse_data(path_list)
+        
+            save_results_to_file("Solutions/k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
 
 if __name__ == '__main__':
     main()
