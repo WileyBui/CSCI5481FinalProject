@@ -80,10 +80,11 @@ def save_results_to_file(output_file, results, success):
     print("Successfully saved data to", output_file)
     
 def main():
-    filenames = ["data_1.txt", "data_2.txt"]
+    # filenames = ["data_1.txt", "data_2.txt"]
+    filenames = ["data_covid.txt"]
     
     for filename in filenames:
-        k = 20
+        k = 5
         sequences = read_data(filename)
         print("\n\n==============================================")
         
