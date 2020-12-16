@@ -129,18 +129,14 @@ def main():
     for filename in filenames:
         data_dict[filename] = read_data(filename)
         
-    for k in range(25, 36):
+    for k in range(15, 43):
         for filename in filenames:
             sequences = data_dict[filename]
             print("\n\n==============================================")
             
             print("Constructing De Bruijn Graph for k={}... ".format(k), end="")
-            graph = de_bruijn(sequences, k)
+            graph, weights = De_Bruijn_Graph(sequences, k)
             print("success.")
-            
-            if (len(graph) == 0):
-                print("Unsuccess: de_bruijn() returns 0 nodes...")
-                return
             
             is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
             
@@ -153,7 +149,7 @@ def main():
             path_list = depth_first_traveral(graph, start_vertex, edges_out)
             path = parse_data(path_list)
         
-            save_results_to_file("Results/k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
+            save_results_to_file("Results/results_k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
 
 if __name__ == '__main__':
   main()
