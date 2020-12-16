@@ -18,9 +18,9 @@ def cleanup_kmers(kmers_dict):
             cleaned_kmers_dict[kmer] = kmers_dict[kmer]
     return cleaned_kmers_dict
 
-def add_nodes_and_edges(kmers_dict):
+def add_nodes_and_edges(kmers_list):
     graph = {}
-    for kmer in kmers_dict:
+    for kmer in kmers_list:
         left = kmer[:-1]
         right = kmer[1:]
         if left in graph:
@@ -29,9 +29,16 @@ def add_nodes_and_edges(kmers_dict):
             graph[left] = [right]
     return graph
 
+def dict_to_list(kmers_dict):
+    list = []
+    for kmer in kmers_dict:
+        list += [kmer]*kmers_dict[kmer]
+    return list
+
 def de_bruijn(reads,k):
-    kmers = cleanup_kmers((reads_to_kmers(reads,k)))
-    return add_nodes_and_edges(kmers)
+    kmers_dict = cleanup_kmers((reads_to_kmers(reads,k)))
+    kmers_list = dict_to_list(kmers_dict)
+    return add_nodes_and_edges(kmers_list)
 
 def read_data(filename):
     f     = open(filename, "r")
@@ -46,8 +53,11 @@ def read_data(filename):
 
 def parse_data(data):
     string = ""
+    last_genome = ""
     for each in data:
-        string += each[0]
+        if last_genome != each:
+            string += each[0]
+            last_genome = each
     string += data[len(data) - 1][1:]
     return string
     
@@ -69,7 +79,7 @@ def main():
     for filename in filenames:
         data_dict[filename] = read_data(filename)
         
-    for k in range(25, 35):
+    for k in range(25, 36):
         for filename in filenames:
             sequences = data_dict[filename]
             print("\n\n==============================================")
@@ -93,7 +103,7 @@ def main():
             path_list = depth_first_traveral(graph, start_vertex, edges_out)
             path = parse_data(path_list)
         
-            save_results_to_file("Solutions/k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
+            save_results_to_file("Solutions1/k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
 
 if __name__ == '__main__':
     main()
