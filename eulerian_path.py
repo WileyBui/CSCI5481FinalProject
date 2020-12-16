@@ -1,3 +1,5 @@
+from graph_construct import *
+
 def has_eulerian_path_and_get_edges(graph):
   """
   This has_eulerian_path_and_get_edges function checks to see if a given graph
@@ -88,9 +90,74 @@ def depth_first_traveral(graph, start_node, edges_out):
   dfs(start_node)
   return path
 
-
-if __name__ == "__main__": 
+def read_data(filename):
+    f     = open(filename, "r")
+    lines = f.readlines()
+    f.close()
     
+    sequences = []
+    
+    for line in lines:
+        sequences.append(line.strip())
+    return sequences
+
+def parse_data(data):
+    string = ""
+    last_genome = ""
+    for each in data:
+        if last_genome != each:
+            string += each[0]
+            last_genome = each
+    string += data[len(data) - 1][1:]
+    return string
+    
+def save_results_to_file(output_file, results, success):
+    f_write = open(output_file, "w+")
+    if success:
+        f_write.write("Success\n")
+    else:
+        f_write.write("Unsuccess\n")
+        
+    f_write.write(results)
+    f_write.close()
+    print("Successfully saved data to", output_file)
+    
+def main():
+    filenames = ["data_1.txt", "data_2.txt"]
+    data_dict = {}
+    
+    for filename in filenames:
+        data_dict[filename] = read_data(filename)
+        
+    for k in range(25, 36):
+        for filename in filenames:
+            sequences = data_dict[filename]
+            print("\n\n==============================================")
+            
+            print("Constructing De Bruijn Graph for k={}... ".format(k), end="")
+            graph = de_bruijn(sequences, k)
+            print("success.")
+            
+            if (len(graph) == 0):
+                print("Unsuccess: de_bruijn() returns 0 nodes...")
+                return
+            
+            is_valid_eulerian_path, edges_in, edges_out = has_eulerian_path_and_get_edges(graph)
+            
+            if (is_valid_eulerian_path):
+                print(filename, "Eulerian path: SUCCESSFULLY FOUND!")
+            else:
+                print(filename, "Eulerian path: UNSUCCESS, but found a partial assembled genome path...")
+                
+            start_vertex = get_starting_node(graph, edges_in, edges_out)
+            path_list = depth_first_traveral(graph, start_vertex, edges_out)
+            path = parse_data(path_list)
+        
+            save_results_to_file("Results/k=" + str(k) + "_" + filename, path, is_valid_eulerian_path)
+
+if __name__ == '__main__':
+  main()
+
   """
   Extra edges that cannot be traversed -
     We use backtracking algorithm to traverse through every single edge.

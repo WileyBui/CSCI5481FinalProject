@@ -30,7 +30,7 @@ def add_nodes_and_edges(kmers_list):
 def dict_to_list(kmers_dict):
     list = []
     for kmer in kmers_dict:
-        list += [kmer]*kmers_dict[kmer]
+        list += [kmer]
     return list
 
 def de_bruijn(reads,k):
@@ -40,7 +40,7 @@ def de_bruijn(reads,k):
 
 
 def main():
-    reads = ["AABB", "AAABB"]
+    reads = ["AABBABAABB", "AAABB"]
     print(de_bruijn(reads, 2))
 
 if __name__ == '__main__':
